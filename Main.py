@@ -20,7 +20,7 @@ WIDTH,HEIGHT = 800,800
 window = pygame.display.set_mode((WIDTH,HEIGHT))
 
 class Player:
-    def __init__(self,x,y,dx,dy,speed):
+    def __init__(self,x,y,dx,dy,speed,width,height):
         self.x = x
         self.y = y
         self.dx = dx
@@ -30,9 +30,34 @@ class Player:
         self.maxdy = 2.5
         self.maxdx = 2.5
         self.speed = speed
-        self.size = 75
-    def draw(self,window):
-        pygame.draw.circle(window,pygame.Color("Red"),(self.x,self.y),self.size)
+        self.size = 35
+        self.width = width
+        self.height = height
+    
+    def draw(self, window):
+        pygame.draw.rect(window, pygame.Color("Red"), 
+        pygame.Rect(self.x, self.y, self.width,self.height)) # Draws a rectangle
+        pygame.draw.rect(window, pygame.Color("blue"), 
+        pygame.Rect(self.x + 3, self.y + 5,74,50))
+        pygame.draw.rect(window, pygame.Color("black"), 
+        pygame.Rect(self.x - 10, self.y + 20,10,40))
+        pygame.draw.rect(window, pygame.Color("black"), 
+        pygame.Rect(self.x + self.width, self.y + 20,10,40))
+        pygame.draw.rect(window, pygame.Color("black"), 
+        pygame.Rect(self.x - 10, self.y + 70,10,40))
+        pygame.draw.rect(window, pygame.Color("black"), 
+        pygame.Rect(self.x + self.width, self.y + 70,10,40))
+        
+    def draw_side(self,window):
+        pygame.draw.rect(window, pygame.Color("Red"), 
+        pygame.Rect(self.x, self.y, self.width,self.height)) # Draws a rectangle
+        pygame.draw.circle(window, pygame.Color("Black"), (self.x,self.y + self.height), self.size)
+        pygame.draw.circle(window, pygame.Color("Gray"), (self.x,self.y + self.height), 15)
+        pygame.draw.rect(window, pygame.Color("blue"), 
+        pygame.Rect(self.x + 50, self.y,70,50))
+        pygame.draw.circle(window, pygame.Color("Black"), (self.x + self.width,self.y + self.height), self.size)
+        pygame.draw.circle(window, pygame.Color("Gray"), (self.x + self.width,self.y + self.height), 15)
+    
     def move(self, keys):
         self.maxdy = 2.5
         self.maxdx = 2.5
@@ -43,7 +68,7 @@ class Player:
             self.dy = self.maxdy
 
         if keys[pygame.K_w]:
-                self.dy -= self.ddy
+            self.dy -= self.ddy
         elif keys[pygame.K_s]:
             self.dy += self.ddy
             
@@ -61,11 +86,11 @@ class Player:
         newX = self.x + self.dx*self.speed
         newY = self.y + self.dy*self.speed
         
-        if newX < WIDTH-self.size and newX > self.size:
+        if newX < WIDTH-self.width+1 and newX > 0:
             self.x += self.dx*self.speed
         else:
             self.maxdx = 0
-        if newY < HEIGHT-self.size and newY > self.size:
+        if newY < HEIGHT-self.height+1 and newY > 0:
             self.y += self.dy*self.speed
         else:
             self.maxdy = 0
@@ -98,7 +123,7 @@ class Bouncing_Ball:
             self.dy = -1*self.dy
         else:
             self.coverd = self.coverd + self.dx*self.speed
-p1 = Player(300,300,0,0,0.3)
+p1 = Player(300,300,0,0,0.3,80,120)
 ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.1)
 while True:
     window.fill("White")

@@ -17,10 +17,11 @@ def colision1(rect1 : pygame.Rect,rect2):
     return False
 WIDTH,HEIGHT = 800,800
 
+my_font = pygame.font.SysFont('Comic Sans MS', 70)
 window = pygame.display.set_mode((WIDTH,HEIGHT))
 
 class Player:
-    def __init__(self,x,y,dx,dy,speed,width,height):
+    def __init__(self,x,y,dx,dy,speed,width,height,gold):
         self.x = x
         self.y = y
         self.dx = dx
@@ -33,6 +34,7 @@ class Player:
         self.size = 35
         self.width = width
         self.height = height
+        self.gold = gold
     
     def draw(self, window):
         pygame.draw.rect(window, pygame.Color("Red"), 
@@ -67,6 +69,7 @@ class Player:
         if self.maxdy < self.dy:
             self.dy = self.maxdy
 
+
         if keys[pygame.K_w]:
             self.dy -= self.ddy
         elif keys[pygame.K_s]:
@@ -86,14 +89,14 @@ class Player:
         newX = self.x + self.dx*self.speed
         newY = self.y + self.dy*self.speed
         
-        if newX < WIDTH-self.width+1 and newX > 0:
+        if newX < WIDTH-(self.width+9) and newX > 10:
             self.x += self.dx*self.speed
         else:
-            self.maxdx = 0
+            self.dx = 0
         if newY < HEIGHT-self.height+1 and newY > 0:
             self.y += self.dy*self.speed
         else:
-            self.maxdy = 0
+            self.dy = 0
         
 class Bouncing_Ball:
     def __init__(self,x,y,dx,dy,ddx,ddy,rad,size,speed):
@@ -123,8 +126,42 @@ class Bouncing_Ball:
             self.dy = -1*self.dy
         else:
             self.coverd = self.coverd + self.dx*self.speed
-p1 = Player(300,300,0,0,0.3,80,120)
-ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.1)
+            
+class Button:
+    def __init__(self,x,y,width,height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        
+    def draw(self,window,player):
+        pygame.draw.rect(window, pygame.Color("Black"), 
+        pygame.Rect(self.x, self.y, self.width,self.height)) # Draws a rectangle
+        text_surface = my_font.render(f"Play", True, (255,255,255))
+        window.blit(text_surface, (self.x + self.width / 2 - 65,self.y + self.height / 2 - 65))
+        text_surface = my_font.render(f"Main Menu", True, (255,0,0))
+        window.blit(text_surface, (self.x + self.width / 2 - 135,self.y + self.height / 2 - 325))
+p1 = Player(300,300,0,0,0.08,80,120,0)
+ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.04)
+button = Button(250,300,300,150)
+
+#if collison(p1.x,p1.y,p1.size,ball.x,ball.y,ball.size)
+
+def button_colision(width,height,x,y,mousePos,mouseState):
+    if mousePos[0] > x and mousePos[0] < x + width and mousePos[1] > y and mousePos[1] < y + height and mouseState[0] == True:
+        return True
+    else:
+        return False
+
+def debugMode(window,gold):
+    text_surface = my_font.render(f"Player Gold {int(gold)}", True, (0, 0, 0))
+    window.blit(text_surface, (0,0))
+    text_surface = my_font.render(f"10 000 000 gold to win!", True, (0, 0, 0))
+    window.blit(text_surface, (0,100))
+    text_surface = my_font.render(f"Have fun and grind!", True, (0, 0, 0))
+    window.blit(text_surface, (0,175))
+prev = 0
+game = 0
 while True:
     window.fill("White")
     keys = pygame.key.get_pressed()
@@ -133,18 +170,37 @@ while True:
     for event in events:
         if event.type == pygame.QUIT:
             exit()
-    #if collison(p1.x,p1.y,p1.size,ball.x,ball.y,ball.size):
+    if game != 1:
+        button.draw(window,p1)
         
+    mouseState = pygame.mouse.get_pressed()
+    mousePos = pygame.mouse.get_pos()
+    
+    if button_colision(button.width,button.height,button.x,button.y,mousePos,mouseState):
+        game = 1
     if keys[pygame.K_ESCAPE]:
         exit()
     
-    ball.move()
-    p1.move(keys)
-    
-    mouseState = pygame.mouse.get_pressed()
-    mousePos = pygame.mouse.get_pos()    
-    
-    p1.draw(window)
-    ball.draw(window)
-    
+    if game == 1:
+        ball.move()
+        p1.move(keys)
+        
+        
+        p1.draw(window)
+        ball.draw(window)
+        if prev == 0:
+            if game == 1:
+                p1.gold += 0.0005
+        if p1.gold >= 100:
+            if keys[pygame.K_c]:
+                prev = 1
+        
+        if prev == 1:
+            if game == 1:
+                p1.gold += 0.001
+                
+        if p1.gold >= 10000000:
+            exit()
+            
+            
     pygame.display.update()

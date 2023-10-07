@@ -24,7 +24,7 @@ my_font = pygame.font.SysFont('Comic Sans MS', 70)
 window = pygame.display.set_mode((WIDTH,HEIGHT))
 
 class Player:
-    def __init__(self,x,y,dx,dy,speed,width,height,gold):
+    def __init__(self,x,y,dx,dy,speed,gold):
         self.x = x
         self.y = y
         self.dx = dx
@@ -36,9 +36,9 @@ class Player:
         self.speed = speed
         self.size = 35
         self.sprite_img = pygame.image.load('231007 - Filip top down car.png')
-        self.scaled_img = pygame.transform.scale(self.sprite_img, (self.sprite_img.get_width()*0.5, self.sprite_img.get_height()*0.5))
-        self.width = width
-        self.height = height
+        self.width = self.sprite_img.get_width()*0.5
+        self.height = self.sprite_img.get_height()*0.5
+        self.scaled_img = pygame.transform.scale(self.sprite_img, (self.width, self.height))
         self.gold = gold
     
     def draw(self, window):
@@ -151,7 +151,7 @@ class Button:
         window.blit(text_surface, (self.x + self.width / 2 - 135,self.y + self.height / 2 - 325))
 
 
-p1 = Player(300,300,0,0,0.1,80,120,0)
+p1 = Player(300,300,0,0,0.1,0)
 ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.06)
 button = Button(250,300,300,150)
 

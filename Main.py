@@ -20,11 +20,11 @@ def colision1(rect1 : pygame.Rect,rect2):
     return False
 WIDTH,HEIGHT = 800,800
 
-my_font = pygame.font.SysFont('Comic Sans MS', 70)
+
 window = pygame.display.set_mode((WIDTH,HEIGHT))
 
 class Player:
-    def __init__(self,x,y,dx,dy,speed,gold):
+    def __init__(self,x,y,dx,dy,speed,gold,angle):
         self.x = x
         self.y = y
         self.dx = dx
@@ -34,6 +34,7 @@ class Player:
         self.maxdy = 2.5
         self.maxdx = 2.5
         self.speed = speed
+        self.angle = angle
         self.size = 35
         self.sprite_img = pygame.image.load('231007 - Filip top down car.png')
         self.width = self.sprite_img.get_width()*0.5
@@ -86,10 +87,16 @@ class Player:
         elif self.dy > 0:
             self.dy -= self.ddy
         
+        if self.angle < 0:
+            self.angle = self.angle + 360
+            
+        if self.angle > 360:
+            self.angle = self.angle - 360
+        
         if keys[pygame.K_a]:
-            self.dx -= self.ddx
+            self.angle -= 0.1
         elif keys[pygame.K_d]:
-            self.dx += self.ddx
+            self.angle += 0.1
         
         elif self.dx > 0:
             self.dx -= self.ddx
@@ -141,20 +148,29 @@ class Button:
         self.y = y
         self.width = width
         self.height = height
-        
+        self.my_font = pygame.font.SysFont('Comic Sans MS', 70)
     def draw(self,window,player):
         pygame.draw.rect(window, pygame.Color("Black"), 
         pygame.Rect(self.x, self.y, self.width,self.height)) # Draws a rectangle
-        text_surface = my_font.render(f"Play", True, (255,255,255))
+        text_surface = self.my_font.render(f"Play", True, (255,255,255))
         window.blit(text_surface, (self.x + self.width / 2 - 65,self.y + self.height / 2 - 65))
-        text_surface = my_font.render(f"Main Menu", True, (255,0,0))
+        text_surface = self.my_font.render(f"Main Menu", True, (255,0,0))
         window.blit(text_surface, (self.x + self.width / 2 - 135,self.y + self.height / 2 - 325))
 
 
-p1 = Player(300,300,0,0,0.1,0)
+class Debug_mode:
+    def __init__(self,window):
+        self.myfont = pygame.font.SysFont('Comic Sans MS', 70)
+        self.myfont1 = pygame.font.SysFont('Comic Sans MS', 20)
+        self.window = window
+    def draw(self,angle,game):
+        text_surface = self.myfont1.render(f"Player angle {int(angle)}", True, (0, 0, 0))
+        self.window.blit(text_surface, (0,0))
+
+p1 = Player(300,300,0,0,0.1,0,0)
 ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.06)
 button = Button(250,300,300,150)
-
+text = Debug_mode(window)
 #if collison(p1.x,p1.y,p1.size,ball.x,ball.y,ball.size)
 
 def button_colision(width,height,x,y,mousePos,mouseState):
@@ -163,13 +179,7 @@ def button_colision(width,height,x,y,mousePos,mouseState):
     else:
         return False
 
-def debugMode(window,gold):
-    text_surface = my_font.render(f"Player Gold {int(gold)}", True, (0, 0, 0))
-    window.blit(text_surface, (0,0))
-    text_surface = my_font.render(f"10 000 000 gold to win!", True, (0, 0, 0))
-    window.blit(text_surface, (0,100))
-    text_surface = my_font.render(f"Have fun and grind!", True, (0, 0, 0))
-    window.blit(text_surface, (0,175))
+
 prev = 0
 game = 0
 while True:
@@ -182,6 +192,8 @@ while True:
             exit()
     if game != 1:
         button.draw(window,p1)
+
+
         
     mouseState = pygame.mouse.get_pressed()
     mousePos = pygame.mouse.get_pos()
@@ -192,6 +204,7 @@ while True:
         exit()
     
     if game == 1:
+        text.draw(p1.angle,game)
         ball.move()
         p1.move(keys)
         
@@ -212,5 +225,5 @@ while True:
         if p1.gold >= 10000000:
             exit()
             
-            
+
     pygame.display.update()

@@ -1,6 +1,9 @@
 import pygame
 import math
+
 pygame.init()
+
+
 def collison(x1,y1,r1,x2,y2,r2):
     dx = x2 - x1
     dy = y2 - y1
@@ -32,11 +35,16 @@ class Player:
         self.maxdx = 2.5
         self.speed = speed
         self.size = 35
+        self.sprite_img = pygame.image.load('231007 - Filip top down car.png')
+        self.scaled_img = pygame.transform.scale(self.sprite_img, (self.sprite_img.get_width()*0.5, self.sprite_img.get_height()*0.5))
         self.width = width
         self.height = height
         self.gold = gold
     
     def draw(self, window):
+        window.blit(self.scaled_img, (self.x, self.y))
+        
+    def draw_above(self,window):
         pygame.draw.rect(window, pygame.Color("Red"), 
         pygame.Rect(self.x, self.y, self.width,self.height)) # Draws a rectangle
         pygame.draw.rect(window, pygame.Color("blue"), 
@@ -141,8 +149,10 @@ class Button:
         window.blit(text_surface, (self.x + self.width / 2 - 65,self.y + self.height / 2 - 65))
         text_surface = my_font.render(f"Main Menu", True, (255,0,0))
         window.blit(text_surface, (self.x + self.width / 2 - 135,self.y + self.height / 2 - 325))
-p1 = Player(300,300,0,0,0.08,80,120,0)
-ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.04)
+
+
+p1 = Player(300,300,0,0,0.1,80,120,0)
+ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.06)
 button = Button(250,300,300,150)
 
 #if collison(p1.x,p1.y,p1.size,ball.x,ball.y,ball.size)

@@ -37,8 +37,8 @@ class Player:
         self.angle = angle
         self.size = 35
         self.sprite_img = pygame.image.load('231007 - Filip top down car.png')
-        self.width = self.sprite_img.get_width()*0.5
-        self.height = self.sprite_img.get_height()*0.5
+        self.width = self.sprite_img.get_width()*0.15
+        self.height = self.sprite_img.get_height()*0.15
         self.scaled_img = pygame.transform.scale(self.sprite_img, (self.width, self.height))
         self.gold = gold
     
@@ -75,20 +75,14 @@ class Player:
     def move(self, keys):
         self.maxdy = 2.5
         self.maxdx = 2.5
+        ddx = 0
+        ddy = 0
         
-        if self.maxdx < self.dx:
-            self.dx = self.maxdx
-        if self.maxdy < self.dy:
-            self.dy = self.maxdy
-
-
-        if keys[pygame.K_w]:
-            self.dy -= self.ddy
-        elif keys[pygame.K_s]:
-            self.dy += self.ddy
-            
-        elif self.dy > 0:
-            self.dy -= self.ddy
+                
+        if keys[pygame.K_a]:
+            self.angle += 0.1
+        elif keys[pygame.K_d]:
+            self.angle -= 0.1
         
         if self.angle < 0:
             self.angle = self.angle + 360
@@ -96,26 +90,65 @@ class Player:
         if self.angle > 360:
             self.angle = self.angle - 360
         
-        if keys[pygame.K_a]:
-            self.angle -= 0.1
-        elif keys[pygame.K_d]:
-            self.angle += 0.1
+        if self.angle < 22.5 or self.angle > 337.5:
+            ddx = 0
+            ddy = -1
+                
+        if self.angle > 22.5 and self.angle <= 67.5:
+            ddx = -0.7
+            ddy = -0.7
+            
+        if self.angle > 67.5 and self.angle <= 112.5:
+            ddx = -1
+            ddy = 0
+            
+        if self.angle > 112.5 and self.angle <= 157.5:
+            ddx = -0.7
+            ddy = 0.7
+                
+        if self.angle > 157.5 and self.angle <= 202.5:
+            ddx = 0
+            ddy = 1
+            
+        #225 angle       
+        if self.angle > 202.5 and self.angle <= 247.5:
+            ddx = 0.7
+            ddy = 0.7
+            
+        #270
+        if self.angle > 247.5 and self.angle <= 292.5:
+            ddx = 1
+            ddy = 0
+            
+                
+        if self.angle > 292.5 and self.angle <= 337.5:
+            ddx = 0.7
+            ddy = -0.7
+                
+        acceleration = 0
+        if self.x > 0 and self.x < 800 and self.y > 0 and self.y < 800:
+            if keys[pygame.K_w]:
+                acceleration = 0.0008
+                
+                
+        if self.x > 0 and self.x < 800 and self.y > 0 and self.y < 800:
+            if keys[pygame.K_s]:
+                acceleration = -0.0008
         
-        elif self.dx > 0:
-            self.dx -= self.ddx
         
-        newX = self.x + self.dx*self.speed
-        newY = self.y + self.dy*self.speed
+        self.dx = self.dx + ddx * acceleration
+        self.dy = self.dy + ddy * acceleration
         
-        if newX < WIDTH-(self.width+9) and newX > 10:
-            self.x += self.dx*self.speed
-        else:
-            self.dx = 0
-        if newY < HEIGHT-self.height+1 and newY > 0:
-            self.y += self.dy*self.speed
-        else:
-            self.dy = 0
-        
+        NEWx = self.x + self.dx
+        NEWy = self.y + self.dy
+        if NEWx > 0 + self.width/2 and NEWx < 800 - self.width/2 and NEWy > 0 + self.height/2 and NEWy < 800 - self.height/2:
+            self.y = NEWy
+            self.x = NEWx
+        friction = 0.9975
+        self.dx = self.dx * friction
+        self.dy = self.dy * friction
+
+      
 class Bouncing_Ball:
     def __init__(self,x,y,dx,dy,ddx,ddy,rad,size,speed):
         self.x = x

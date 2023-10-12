@@ -43,7 +43,10 @@ class Player:
         self.gold = gold
     
     def draw(self, window):
-        window.blit(self.scaled_img, (self.x, self.y))
+        rotated_img = pygame.transform.rotate(self.scaled_img, self.angle)
+        self.width = rotated_img.get_width()
+        self.height = rotated_img.get_height()
+        window.blit(rotated_img, (self.x - self.width/2, self.y - self.height/2))
         
     def draw_above(self,window):
         pygame.draw.rect(window, pygame.Color("Red"), 

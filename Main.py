@@ -36,7 +36,7 @@ class Player:
         self.speed = speed
         self.angle = angle
         self.size = 35
-        self.sprite_img = pygame.image.load('231007 - Filip top down car.png')
+        self.sprite_img = pygame.image.load('231007 - Filip top down car1.png')
         self.width = self.sprite_img.get_width()*0.15
         self.height = self.sprite_img.get_height()*0.15
         self.scaled_img = pygame.transform.scale(self.sprite_img, (self.width, self.height))
@@ -141,7 +141,7 @@ class Player:
         
         NEWx = self.x + self.dx
         NEWy = self.y + self.dy
-        if NEWx > 0 + self.width/2 and NEWx < 800 - self.width/2 and NEWy > 0 + self.height/2 and NEWy < 800 - self.height/2:
+        if NEWx > 10 + self.width/2 and NEWx < 790 - self.width/2 and NEWy > 10 + self.height/2 and NEWy < 790 - self.height/2:
             self.y = NEWy
             self.x = NEWx
         friction = 0.9975

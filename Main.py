@@ -274,7 +274,7 @@ while True:
         if d <= 0:
             if collison(p1.x,p1.y,p1.height,ball.x,ball.y,ball.rad):
                 p1.gold = p1.gold + 5
-                d = 300
+                d = 900
         p1.draw(window)
         ball.draw(window)
         if p1.gold >= 100:

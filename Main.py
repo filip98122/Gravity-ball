@@ -20,11 +20,11 @@ def colision1(rect1 : pygame.Rect,rect2):
     return False
 WIDTH,HEIGHT = 800,800
 
-
+sprite_img = pygame.image.load('231007 - Filip top down car1.png')
 window = pygame.display.set_mode((WIDTH,HEIGHT))
 
 class Player:
-    def __init__(self,x,y,dx,dy,speed,gold,angle):
+    def __init__(self,x,y,dx,dy,height,speed,gold,angle):
         self.x = x
         self.y = y
         self.dx = dx
@@ -38,7 +38,7 @@ class Player:
         self.size = 35
         self.sprite_img = pygame.image.load('231007 - Filip top down car1.png')
         self.width = self.sprite_img.get_width()*0.15
-        self.height = self.sprite_img.get_height()*0.15
+        self.height = height
         self.scaled_img = pygame.transform.scale(self.sprite_img, (self.width, self.height))
         self.gold = gold
     
@@ -78,7 +78,22 @@ class Player:
         ddx = 0
         ddy = 0
         
-                
+        rotated_img = pygame.transform.rotate(self.scaled_img, self.angle)
+        self.width = rotated_img.get_width()
+        self.height = rotated_img.get_height()
+        
+        if self.y <= 31:
+            self.y = 31
+        
+        if self.y >= 769:
+            self.y = 769
+        
+        if self.x >= 769:
+            self.x = 769
+        
+        if self.x <= 31:
+            self.x = 31
+        
         if keys[pygame.K_a]:
             self.angle += 0.1
         elif keys[pygame.K_d]:
@@ -134,7 +149,6 @@ class Player:
         if self.x > 0 and self.x < 800 and self.y > 0 and self.y < 800:
             if keys[pygame.K_s]:
                 acceleration = -0.0008
-        
         
         self.dx = self.dx + ddx * acceleration
         self.dy = self.dy + ddy * acceleration
@@ -199,11 +213,16 @@ class Debug_mode:
         self.myfont = pygame.font.SysFont('Comic Sans MS', 70)
         self.myfont1 = pygame.font.SysFont('Comic Sans MS', 20)
         self.window = window
-    def draw(self,angle,game):
+    def draw(self,angle,game,y,gold):
         text_surface = self.myfont1.render(f"Player angle {int(angle)}", True, (0, 0, 0))
+        text_surface2 = self.myfont1.render(f"Player y {int(y)}", True, (0, 0, 0))
+        text_surface3 = self.myfont1.render(f"Player gold {int(p1.gold)}", True, (0, 0, 0))
+
+        self.window.blit(text_surface3, (0,100))
+        self.window.blit(text_surface2, (0,50))
         self.window.blit(text_surface, (0,0))
 
-p1 = Player(300,300,0,0,0.1,0,0)
+p1 = Player(300,300,0,0,sprite_img.get_height()*0.15,0.1,0,0)
 ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.06)
 button = Button(250,300,300,150)
 text = Debug_mode(window)
@@ -217,6 +236,14 @@ def button_colision(width,height,x,y,mousePos,mouseState):
 
 
 prev = 0
+
+#f = open("test.txt", "r")
+#contents = f.read()
+#lines = contents.split("\n")
+#f.close()
+
+
+d = 0
 game = 0
 while True:
     window.fill("White")
@@ -240,26 +267,22 @@ while True:
         exit()
     
     if game == 1:
-        text.draw(p1.angle,game)
+        text.draw(p1.angle,game,p1.y,p1.gold)
         ball.move()
         p1.move(keys)
         
-        
+        if d <= 0:
+            if collison(p1.x,p1.y,p1.height,ball.x,ball.y,ball.rad):
+                p1.gold = p1.gold + 5
+                d = 300
         p1.draw(window)
         ball.draw(window)
-        if prev == 0:
-            if game == 1:
-                p1.gold += 0.0005
         if p1.gold >= 100:
             if keys[pygame.K_c]:
                 prev = 1
-        
-        if prev == 1:
-            if game == 1:
-                p1.gold += 0.001
                 
         if p1.gold >= 10000000:
             exit()
             
-
+        d -= 1
     pygame.display.update()

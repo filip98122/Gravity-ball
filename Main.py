@@ -193,39 +193,56 @@ class Bouncing_Ball:
             self.coverd = self.coverd + self.dx*self.speed
             
 class Button:
-    def __init__(self,x,y,width,height):
+    def __init__(self,x,y,width,height,text):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
+        self.text = text
         self.my_font = pygame.font.SysFont('Comic Sans MS', 70)
     def draw(self,window,player):
+        
+        text_surface = self.my_font.render(f"Main Menu", True, (255,0,0))
+        window.blit(text_surface, (button.x + button.width / 2 - 135,button.y + button.height / 2 - 325))
         pygame.draw.rect(window, pygame.Color("Black"), 
         pygame.Rect(self.x, self.y, self.width,self.height)) # Draws a rectangle
-        text_surface = self.my_font.render(f"Play", True, (255,255,255))
+        text_surface = self.my_font.render(self.text, True, (255,255,255))
         window.blit(text_surface, (self.x + self.width / 2 - 65,self.y + self.height / 2 - 65))
-        text_surface = self.my_font.render(f"Main Menu", True, (255,0,0))
-        window.blit(text_surface, (self.x + self.width / 2 - 135,self.y + self.height / 2 - 325))
 
+main_menu = 1
 
 class Debug_mode:
     def __init__(self,window):
         self.myfont = pygame.font.SysFont('Comic Sans MS', 70)
         self.myfont1 = pygame.font.SysFont('Comic Sans MS', 20)
         self.window = window
-    def draw(self,angle,game,y,gold):
+    def draw(self,angle,game,y,gold,button):
         text_surface = self.myfont1.render(f"Player angle {int(angle)}", True, (0, 0, 0))
         text_surface2 = self.myfont1.render(f"Player y {int(y)}", True, (0, 0, 0))
         text_surface3 = self.myfont1.render(f"Player gold {int(p1.gold)}", True, (0, 0, 0))
 
+
+            
         self.window.blit(text_surface3, (0,100))
         self.window.blit(text_surface2, (0,50))
         self.window.blit(text_surface, (0,0))
 
 p1 = Player(300,300,0,0,sprite_img.get_height()*0.15,0.1,0,0)
 ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.06)
-button = Button(250,300,300,150)
-text = Debug_mode(window)
+
+l_buttons = []
+button = Button(250,300,250,150, "Play")
+l_buttons.append(button)
+
+shop = Button(250,600,250,150, "Shop")
+l_buttons.append(shop)
+
+#upgrade_speed = Button()
+
+
+
+
+text = Debug_mode(window,)
 #if collison(p1.x,p1.y,p1.size,ball.x,ball.y,ball.size)
 
 def button_colision(width,height,x,y,mousePos,mouseState):
@@ -235,39 +252,84 @@ def button_colision(width,height,x,y,mousePos,mouseState):
         return False
 
 
+write_gold = 0
+
 prev = 0
-
-#f = open("test.txt", "r")
-#contents = f.read()
-#lines = contents.split("\n")
-#f.close()
-
-
+"""
+f = open("test.txt", "w")
+contents = f.read(w)
+lines = contents.split("\n")
+write_gold = write_gold + p1.gold
+f.write(write_gold)
+f.close()
+"""
+shop_inside = 0
 d = 0
 game = 0
+
+
+
 while True:
+    
     window.fill("White")
     keys = pygame.key.get_pressed()
     events = pygame.event.get()
-    
-    for event in events:
-        if event.type == pygame.QUIT:
-            exit()
-    if game != 1:
-        button.draw(window,p1)
-
-
-        
     mouseState = pygame.mouse.get_pressed()
     mousePos = pygame.mouse.get_pos()
     
-    if button_colision(button.width,button.height,button.x,button.y,mousePos,mouseState):
-        game = 1
+    for event in events:
+        if event.type == pygame.QUIT:
+            f = open("test.txt", "r")
+            write_gold = int(f.read())
+            f.close()
+            f = open("test.txt", "w")
+            write_gold = write_gold + p1.gold
+            f.write(str(write_gold))
+            f.close()
+            exit()
+            
+    if main_menu == 1:
+        
+        button.draw(window,p1)
+        shop.draw(window,p1)
+        myfont = pygame.font.SysFont('Comic Sans MS', 70)
+        my_font = pygame.font.SysFont('Comic Sans MS', 70)
+        text_surface = my_font.render(f"Main Menu", True, (255,0,0))
+        window.blit(text_surface, (button.x + button.width / 2 - 135,button.y + button.height / 2 - 325))
+        if button_colision(button.width,button.height,button.x,button.y,mousePos,mouseState):
+            game = 1
+            main_menu = 0
+            shop_inside = 0
+        if button_colision(shop.width,shop.height,shop.x,shop.y,mousePos,mouseState):
+            game = 0
+            main_menu = 0
+            shop_inside = 1
+        
+        
+    #if shop_inside == 1:
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     if keys[pygame.K_ESCAPE]:
+        f = open("test.txt", "r")
+        write_gold = int(f.read())
+        f.close()
+        f = open("test.txt", "w")
+        write_gold = write_gold + p1.gold
+        f.write(str(write_gold))
+        f.close()
         exit()
     
     if game == 1:
-        text.draw(p1.angle,game,p1.y,p1.gold)
+        text.draw(p1.angle,game,p1.y,p1.gold,button)
         ball.move()
         p1.move(keys)
         
@@ -277,12 +339,6 @@ while True:
                 d = 900
         p1.draw(window)
         ball.draw(window)
-        if p1.gold >= 100:
-            if keys[pygame.K_c]:
-                prev = 1
-                
-        if p1.gold >= 10000000:
-            exit()
             
         d -= 1
     pygame.display.update()

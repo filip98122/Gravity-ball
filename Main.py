@@ -143,12 +143,12 @@ class Player:
         acceleration = 0
         if self.x > 0 and self.x < 800 and self.y > 0 and self.y < 800:
             if keys[pygame.K_w]:
-                acceleration = 0.0008
-                
+                acceleration = self.speed
+
                 
         if self.x > 0 and self.x < 800 and self.y > 0 and self.y < 800:
             if keys[pygame.K_s]:
-                acceleration = -0.0008
+                acceleration = -self.speed
         
         self.dx = self.dx + ddx * acceleration
         self.dy = self.dy + ddy * acceleration
@@ -204,9 +204,29 @@ class Button:
     def draw(self,window,player):
         pygame.draw.rect(window, pygame.Color("Black"), 
         pygame.Rect(self.x, self.y, self.width,self.height)) # Draws a rectangle
-
+        
+write_gold = 0
 main_menu = 1
 myfont1 = pygame.font.SysFont('Comic Sans MS', 15)
+
+p1 = Player(300,300,0,0,sprite_img.get_height()*0.15,0.0008,0,0)
+ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.06)
+
+l_buttons = []
+button = Button(250,300,250,150, "Play")
+l_buttons.append(button)
+
+shop = Button(250,600,250,150, "Shop")
+l_buttons.append(shop)
+
+upgrade_speed = Button(50,50,110,46.5,"upgrade speed")
+l_buttons.append(upgrade_speed)
+
+upgrade_speed2 = Button(210,50,110,46.5,"upgrade speed 2")
+l_buttons.append(upgrade_speed2)
+
+was_holding = False
+
 class Debug_mode:
     def __init__(self,window):
         self.myfont = pygame.font.SysFont('Comic Sans MS', 70)
@@ -236,25 +256,17 @@ class Debug_mode:
             text_surface11 = self.myfont1.render("Upgrade speed", True, (255,255,255))
             window.blit(text_surface11, (upgrade_speed.x + upgrade_speed.width / 2 - 50,upgrade_speed.y + upgrade_speed.height / 2 - 20))
 
+            text_surface11 = self.myfont1.render("Upgrade speed 2", True, (255,255,255))
+            window.blit(text_surface11, (upgrade_speed2.x + upgrade_speed2.width / 2 - 50,upgrade_speed2.y + upgrade_speed2.height / 2 - 20))
+
+            text_surface11 = self.myfont1.render("500 gold", True, (255,255,255))
+            window.blit(text_surface11, (upgrade_speed2.x + upgrade_speed2.width / 2 - 50,upgrade_speed2.y + upgrade_speed2.height / 2))
+        
             text_surface11 = self.myfont1.render("300 gold", True, (255,255,255))
             window.blit(text_surface11, (upgrade_speed.x + upgrade_speed.width / 2 - 50,upgrade_speed.y + upgrade_speed.height / 2))
 
-p1 = Player(300,300,0,0,sprite_img.get_height()*0.15,0.1,0,0)
-ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.06)
 
-l_buttons = []
-button = Button(250,300,250,150, "Play")
-l_buttons.append(button)
-
-shop = Button(250,600,250,150, "Shop")
-l_buttons.append(shop)
-
-upgrade_speed = Button(50,50,110,46.5,"upgrade speed")
-l_buttons.append(upgrade_speed)
-
-was_holding = False
-
-text = Debug_mode(window,)
+text = Debug_mode(window)
 
 ab = 0
 def button_colision(width,height,x,y,mousePos,mouseState):
@@ -264,7 +276,8 @@ def button_colision(width,height,x,y,mousePos,mouseState):
         return False
 
 
-write_gold = 0
+
+s = 0
 
 prev = 0
 """
@@ -279,11 +292,21 @@ shop_inside = 0
 d = 0
 game = 0
 
+
 was_holding = False
 
+def read(writegold):
+    f = open("test.txt", "r")
+    writegold = int(f.read()) + p1.gold
+    f.close()
+    f = open("test.txt", "w")
+    writegold += p1.gold
+    f.write(str(writegold))
+    f.close()
+    return writegold
 
-while True:
     
+while True:
 
     window.fill("White")
     keys = pygame.key.get_pressed()
@@ -293,13 +316,7 @@ while True:
     
     for event in events:
         if event.type == pygame.QUIT:
-            f = open("test.txt", "r")
-            write_gold = int(f.read())
-            f.close()
-            f = open("test.txt", "w")
-            write_gold = write_gold + p1.gold
-            f.write(str(write_gold))
-            f.close()
+            read(write_gold)
             exit()
             
     if main_menu == 1:
@@ -323,20 +340,44 @@ while True:
         write_gold = int(f.read()) + p1.gold
         f.close()
         upgrade_speed.draw(window,p1)
+        upgrade_speed2.draw(window,p1)
         if write_gold >= 300:
             if button_colision(upgrade_speed.width,upgrade_speed.height,upgrade_speed.x,upgrade_speed.y,mousePos,mouseState):
-                p1.speed = 0.15
-                write_gold -= 300
+                p1.speed = 0.0015
+                p1.gold -= 300
                 ab = 1
+                
+        else:
+            text_surface22 = myfont1.render("Not enough gold", True, (0,0,0))
+            window.blit(text_surface22, (upgrade_speed.x + upgrade_speed.width / 2 - 50,upgrade_speed.y + upgrade_speed.height / 2 + 20))
+
+                
+                
         if ab == 1:
             text_surface12 = myfont1.render("Bought", True, (0,0,0))
             window.blit(text_surface12, (upgrade_speed.x + upgrade_speed.width / 2 - 50,upgrade_speed.y + upgrade_speed.height / 2 + 20))
-    
+
+        if write_gold >= 500:
+            if s == 0:
+                if p1.speed == 0.0015:
+                    if button_colision(upgrade_speed2.width,upgrade_speed2.height,upgrade_speed2.x,upgrade_speed2.y,mousePos,mouseState):
+                        p1.speed = 0.0020
+                        p1.gold -= 500
+                        s = 1
+                        pygame.K_ESCAPE
+                        
+        else:           
+            text_surface263 = myfont1.render("Not enough gold", True, (0,0,0))
+            window.blit(text_surface263, (upgrade_speed2.x + upgrade_speed2.width / 2 - 50,upgrade_speed2.y + upgrade_speed2.height / 2 + 20))
+
         
+                
+        if s == 1:
+            text_surface12 = myfont1.render("Bought", True, (0,0,0))
+            window.blit(text_surface12, (upgrade_speed2.x + upgrade_speed2.width / 2 - 50,upgrade_speed2.y + upgrade_speed2.height / 2 + 20))
+
         
-        
-        
-        
+
         
     if main_menu == 0:
         if keys[pygame.K_ESCAPE]:
@@ -347,13 +388,7 @@ while True:
     if main_menu == 1:
         if keys[pygame.K_ESCAPE]:
             if was_holding == False:
-                f = open("test.txt", "r")
-                write_gold = int(f.read())
-                f.close()
-                f = open("test.txt", "w")
-                write_gold = write_gold + p1.gold
-                f.write(str(write_gold))
-                f.close()
+                read(write_gold)
                 exit()
         else:
             was_holding = False
@@ -366,7 +401,7 @@ while True:
         
         if d <= 0:
             if collison(p1.x,p1.y,p1.height,ball.x,ball.y,ball.rad):
-                p1.gold = p1.gold + 5
+                p1.gold += 5
                 d = 900
         p1.draw(window)
         ball.draw(window)

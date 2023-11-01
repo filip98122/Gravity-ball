@@ -1,5 +1,6 @@
 import pygame
 import math
+import time
 
 pygame.init()
 
@@ -23,8 +24,94 @@ WIDTH,HEIGHT = 800,800
 sprite_img = pygame.image.load('231007 - Filip top down car1.png')
 window = pygame.display.set_mode((WIDTH,HEIGHT))
 
+def angle (angle):
+    
+    ddx = 0
+    ddy = 0
+    if angle < 22.5 or angle > 337.5:
+        ddx = 0
+        ddy = -1
+            
+    if angle > 22.5 and angle <= 67.5:
+        ddx = -0.7
+        ddy = -0.7
+
+        
+    if angle > 67.5 and angle <= 112.5:
+        ddx = -1
+        ddy = 0
+        
+    if angle > 112.5 and angle <= 157.5:
+        ddx = -0.7
+        ddy = 0.7
+            
+    if angle > 157.5 and angle <= 202.5:
+        ddx = 0
+        ddy = 1
+        
+    #225 angle       
+    if angle > 202.5 and angle <= 247.5:
+        ddx = 0.7
+        ddy = 0.7
+        
+    #270
+    if angle > 247.5 and angle <= 292.5:
+        ddx = 1
+        ddy = 0
+        
+            
+    if angle > 292.5 and angle <= 337.5:
+        ddx = 0.7
+        ddy = -0.7
+
+    return [ddx,ddy]
+
+#bullet goes faster so faster dx and dy
+
+def angle1(angle):
+    
+    ddx = 0
+    ddy = 0
+    if angle < 22.5 or angle > 337.5:
+        ddx = 0
+        ddy = -280
+            
+    if angle > 22.5 and angle <= 67.5:
+        ddx = -160
+        ddy = -160
+
+        
+    if angle > 67.5 and angle <= 112.5:
+        ddx = -280
+        ddy = 0
+        
+    if angle > 112.5 and angle <= 157.5:
+        ddx = -160
+        ddy = 160
+            
+    if angle > 157.5 and angle <= 202.5:
+        ddx = 0
+        ddy = 280
+        
+    #225 angle       
+    if angle > 202.5 and angle <= 247.5:
+        ddx = 160
+        ddy = 160
+        
+    #270
+    if angle > 247.5 and angle <= 292.5:
+        ddx = 280
+        ddy = 0
+        
+            
+    if angle > 292.5 and angle <= 337.5:
+        ddx = 160
+        ddy = -160
+
+    return [ddx,ddy]
+
 class Player:
-    def __init__(self,x,y,dx,dy,height,speed,gold,angle):
+    def __init__(self,x,y,dx,dy,height,speed,gold,angle,ddx,ddy):
         self.x = x
         self.y = y
         self.dx = dx
@@ -41,7 +128,10 @@ class Player:
         self.height = height
         self.scaled_img = pygame.transform.scale(self.sprite_img, (self.width, self.height))
         self.gold = gold
-    
+        self.ddx = ddx
+        self.ddy = ddy
+        
+        
     def draw(self, window):
         rotated_img = pygame.transform.rotate(self.scaled_img, self.angle)
         self.width = rotated_img.get_width()
@@ -75,8 +165,10 @@ class Player:
     def move(self, keys):
         self.maxdy = 2.5
         self.maxdx = 2.5
-        ddx = 0
-        ddy = 0
+        
+        ddx, ddy = angle(self.angle)
+        
+
         
         rotated_img = pygame.transform.rotate(self.scaled_img, self.angle)
         self.width = rotated_img.get_width()
@@ -99,46 +191,7 @@ class Player:
         elif keys[pygame.K_d]:
             self.angle -= 0.1
         
-        if self.angle < 0:
-            self.angle = self.angle + 360
-            
-        if self.angle > 360:
-            self.angle = self.angle - 360
-        
-        if self.angle < 22.5 or self.angle > 337.5:
-            ddx = 0
-            ddy = -1
-                
-        if self.angle > 22.5 and self.angle <= 67.5:
-            ddx = -0.7
-            ddy = -0.7
-            
-        if self.angle > 67.5 and self.angle <= 112.5:
-            ddx = -1
-            ddy = 0
-            
-        if self.angle > 112.5 and self.angle <= 157.5:
-            ddx = -0.7
-            ddy = 0.7
-                
-        if self.angle > 157.5 and self.angle <= 202.5:
-            ddx = 0
-            ddy = 1
-            
-        #225 angle       
-        if self.angle > 202.5 and self.angle <= 247.5:
-            ddx = 0.7
-            ddy = 0.7
-            
-        #270
-        if self.angle > 247.5 and self.angle <= 292.5:
-            ddx = 1
-            ddy = 0
-            
-                
-        if self.angle > 292.5 and self.angle <= 337.5:
-            ddx = 0.7
-            ddy = -0.7
+
                 
         acceleration = 0
         if self.x > 0 and self.x < 800 and self.y > 0 and self.y < 800:
@@ -161,8 +214,45 @@ class Player:
         friction = 0.9975
         self.dx = self.dx * friction
         self.dy = self.dy * friction
+        
+        if self.angle < 0:
+            self.angle = self.angle + 360
+        
+        if self.angle > 360:
+            self.angle = self.angle - 360
+        
 
-      
+
+p1 = Player(300,300,0,0,sprite_img.get_height()*0.15,0.0008,0,0,0,0)
+
+class Laser:
+    def __init__(self,x,y,rad,dx,dy,speed,active):
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.rad = rad
+        self.speed = speed
+        self.active = active
+        self.angle = p1.angle
+    def draw(self,window):
+        pygame.draw.circle(window, pygame.Color("Red"), (self.x, self.y),self.rad) # Draws a laser
+    def move(self):
+        self.dx, self.dy = angle1(self.angle)
+        
+        if self.angle < 0:
+            self.angle = self.angle + 360
+        
+        if self.angle > 360:
+            self.angle = self.angle - 360
+        
+        self.x += self.dx * self.speed
+        self.y += self.dy * self.speed
+        
+    
+    
+    
+    
 class Bouncing_Ball:
     def __init__(self,x,y,dx,dy,ddx,ddy,rad,size,speed):
         self.x = x
@@ -209,8 +299,11 @@ write_gold = 0
 main_menu = 1
 myfont1 = pygame.font.SysFont('Comic Sans MS', 15)
 
-p1 = Player(300,300,0,0,sprite_img.get_height()*0.15,0.0008,0,0)
 ball = Bouncing_Ball(300,300,1,1,0,0.002,75,75,0.06)
+
+
+l_lasers = []
+
 
 l_buttons = []
 button = Button(250,300,250,150, "Play")
@@ -267,7 +360,7 @@ class Debug_mode:
 
 
 text = Debug_mode(window)
-
+es = 0
 ab = 0
 def button_colision(width,height,x,y,mousePos,mouseState):
     if mousePos[0] > x and mousePos[0] < x + width and mousePos[1] > y and mousePos[1] < y + height and mouseState[0] == True:
@@ -291,21 +384,19 @@ f.close()
 shop_inside = 0
 d = 0
 game = 0
-
+g = 0
 
 was_holding = False
 
 def read(writegold):
-    f = open("test.txt", "r")
-    writegold = int(f.read()) + p1.gold
-    f.close()
     f = open("test.txt", "w")
     writegold += p1.gold
     f.write(str(writegold))
     f.close()
     return writegold
 
-    
+clock = pygame.time.Clock()
+cool = 0
 while True:
 
     window.fill("White")
@@ -333,23 +424,27 @@ while True:
             game = 0
             main_menu = 0
             shop_inside = 1
-        
+    
+    
     
     if shop_inside == 1:
-        f = open("test.txt", "r")
-        write_gold = int(f.read()) + p1.gold
-        f.close()
+        if g == 0:
+            f = open("test.txt", "r")
+            write_gold = int(f.read()) + p1.gold
+            f.close()
+            g = 1
         upgrade_speed.draw(window,p1)
         upgrade_speed2.draw(window,p1)
         if write_gold >= 300:
             if button_colision(upgrade_speed.width,upgrade_speed.height,upgrade_speed.x,upgrade_speed.y,mousePos,mouseState):
                 p1.speed = 0.0015
-                p1.gold -= 300
+                write_gold -= 300
                 ab = 1
                 
         else:
-            text_surface22 = myfont1.render("Not enough gold", True, (0,0,0))
-            window.blit(text_surface22, (upgrade_speed.x + upgrade_speed.width / 2 - 50,upgrade_speed.y + upgrade_speed.height / 2 + 20))
+            if ab != 1:
+                text_surface22 = myfont1.render("Not enough gold", True, (0,0,0))
+                window.blit(text_surface22, (upgrade_speed.x + upgrade_speed.width / 2 - 50,upgrade_speed.y + upgrade_speed.height / 2 + 20))
 
                 
                 
@@ -362,13 +457,13 @@ while True:
                 if p1.speed == 0.0015:
                     if button_colision(upgrade_speed2.width,upgrade_speed2.height,upgrade_speed2.x,upgrade_speed2.y,mousePos,mouseState):
                         p1.speed = 0.0020
-                        p1.gold -= 500
+                        write_gold -= 500
                         s = 1
-                        pygame.K_ESCAPE
                         
-        else:           
-            text_surface263 = myfont1.render("Not enough gold", True, (0,0,0))
-            window.blit(text_surface263, (upgrade_speed2.x + upgrade_speed2.width / 2 - 50,upgrade_speed2.y + upgrade_speed2.height / 2 + 20))
+        else: 
+            if s != 1:          
+                text_surface263 = myfont1.render("Not enough gold", True, (0,0,0))
+                window.blit(text_surface263, (upgrade_speed2.x + upgrade_speed2.width / 2 - 50,upgrade_speed2.y + upgrade_speed2.height / 2 + 20))
 
         
                 
@@ -388,16 +483,29 @@ while True:
     if main_menu == 1:
         if keys[pygame.K_ESCAPE]:
             if was_holding == False:
+                0
                 read(write_gold)
                 exit()
         else:
             was_holding = False
     if game == 1:
-        ball.move()
-        p1.move(keys)
         main_menu = 0
         shop_inside = 0
         
+        ball.move()
+        p1.move(keys)
+        
+        for laser in l_lasers:
+            if laser.active == 1:
+                laser.move()
+                laser.draw(window)
+                
+        if keys[pygame.K_SPACE]:
+            if cool <= 0:
+                laser = Laser(p1.x,p1.y + 15,5,p1.dx,p1.dy,0.0013,1)
+                l_lasers.append(laser)
+                cool = 800
+                es = 1
         
         if d <= 0:
             if collison(p1.x,p1.y,p1.height,ball.x,ball.y,ball.rad):
@@ -405,7 +513,9 @@ while True:
                 d = 900
         p1.draw(window)
         ball.draw(window)
-            
         d -= 1
+        cool -= 1
+        
+        clock.tick(850)
     text.draw(p1.angle,game,p1.y,p1.gold,button,text,shop,shop_inside)
     pygame.display.update()

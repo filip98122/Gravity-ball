@@ -27,6 +27,8 @@ window = pygame.display.set_mode((WIDTH,HEIGHT))
 
 def angle (angle):
     
+    rad = math.radians(angle)
+    
     dx = 0
     dy = 0
     if angle < 22.5 or angle > 337.5:
@@ -65,7 +67,9 @@ def angle (angle):
         dx = 0.7
         dy = -0.7
 
-    return [dx,dy]
+    dx = math.cos(rad)
+    dy = math.sin(rad)
+    return [dx,dy,rad]
 
 #bullet goes faster so faster dx and dy
 
@@ -94,6 +98,7 @@ class Player:
         
         
     def draw(self, window):
+        ddx, ddy, self.angle = angle(self.angle)
         rotated_img = pygame.transform.rotate(self.scaled_img, self.angle)
         self.width = rotated_img.get_width()
         self.height = rotated_img.get_height()
@@ -127,7 +132,7 @@ class Player:
         self.maxdy = 2.5
         self.maxdx = 2.5
         
-        ddx, ddy = angle(self.angle)
+        ddx, ddy, self.angle = angle(self.angle)
         
 
         
@@ -148,9 +153,9 @@ class Player:
             self.x = 31
         
         if keys[pygame.K_a]:
-            self.angle += 0.1
+            self.angle += 0.0000000000000001
         elif keys[pygame.K_d]:
-            self.angle -= 0.1
+            self.angle -= 0.0000000000000001
         
 
                 
@@ -199,7 +204,7 @@ class Laser:
     def draw(self,window):
         pygame.draw.circle(window, pygame.Color("Red"), (self.x, self.y),self.rad) # Draws a laser
     def move(self):
-        self.dx, self.dy = angle(self.angle)
+        self.dx, self.dy,self.angle = angle(self.angle)
         
         if self.angle < 0:
             self.angle = self.angle + 360
@@ -364,10 +369,10 @@ def read():
     writegold = f.read()
     return writegold
     
-def add_gold(writegold):
+def add_gold(writegold,minus):
     writegold = float(str(writegold))
     writegold = int(float(writegold))
-    writegold += p1.gold
+    writegold += p1.gold - minus
     return writegold
     
 def write(writegold):
@@ -375,6 +380,8 @@ def write(writegold):
     f.write(str(writegold))
     f.close()
     return writegold
+
+minus = 0
 
 clock = pygame.time.Clock()
 cool = 0
@@ -389,7 +396,7 @@ while True:
     for event in events:
         if event.type == pygame.QUIT:
             write_gold = read()
-            write_gold = add_gold(write_gold)
+            write_gold = add_gold(write_gold,minus)
             write(write_gold)
             exit()
             
@@ -429,7 +436,7 @@ while True:
             if ab != 1:
                 if button_colision(upgrade_speed.width,upgrade_speed.height,upgrade_speed.x,upgrade_speed.y,mousePos,mouseState):
                     p1.speed = 0.0015
-                    write_gold -= 300
+                    minus += 300
                     ab = 1
                 
         else:
@@ -455,7 +462,7 @@ while True:
                 if p1.speed == 0.0015:
                     if button_colision(upgrade_speed2.width,upgrade_speed2.height,upgrade_speed2.x,upgrade_speed2.y,mousePos,mouseState):
                         p1.speed = 0.0020
-                        write_gold -= 500
+                        minus += 500
                         s = 1
                         
         else: 
@@ -478,7 +485,7 @@ while True:
             if v != 1:
                 if button_colision(bul.width,bul.height,bul.x,bul.y,mousePos,mouseState):
                     m = 250
-                    write_gold -= 400
+                    minus += 400
                     v = 1
                 
         else:
@@ -506,7 +513,7 @@ while True:
         if keys[pygame.K_ESCAPE]:
             if was_holding == False:
                 write_gold = read()
-                write_gold = add_gold(write_gold)
+                write_gold = add_gold(write_gold,minus)
                 write(write_gold)
                 exit()
         else:
